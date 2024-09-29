@@ -10,6 +10,7 @@ var session = require('express-session')
 
 var userRouter = require('./routes/user');
 var adminRouter = require('./routes/admin');
+const { rmSync } = require('fs');
 
 var app = express();
 
@@ -26,7 +27,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload())
-app.use(session({secret:'key', cookie:{maxAge:600000}}))
+
+app.use(session({
+    secret: 'key',
+    resave: false, // Set to false to prevent resaving unchanged sessions
+    saveUninitialized: true, // Set to true to save uninitialized sessions (default: true)
+    cookie: { maxAge: 600000 } // Session duration
+}));
+
 db.connectToDatabase((err) => {
   if (err) {
     console.log('Connection error: ' + err);
