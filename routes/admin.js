@@ -7,7 +7,7 @@ var productHelper = require('../helpers/product-helpers')
 router.get('/', function (req, res, next) {
 
   productHelper.getAllProducts().then((products) => {
-    res.render('admin/view-products', {admin: true, products})
+    res.render('admin/view-products', { admin: true, products })
   })
 })
 
@@ -28,22 +28,22 @@ router.post('/add-product', (req, res) => {
   })
 })
 
-router.get('/delete-product/:id', (req, res)=>{
+router.get('/delete-product/:id', (req, res) => {
   productId = req.params.id;
-  productHelper.deleteProduct(productId).then((response)=>{
+  productHelper.deleteProduct(productId).then((response) => {
     res.redirect('/admin/')
   })
 })
-router.get('/edit-product/:id', async (req, res)=>{
+router.get('/edit-product/:id', async (req, res) => {
   let product = await productHelper.getProductDetails(req.params.id)
-  res.render('admin/edit-product', {product})
+  res.render('admin/edit-product', { product })
 })
 
-router.post('/edit-product/:id', (req, res)=>{
-  productHelper.updateProduct(req.params.id, req.body).then(()=>{
+router.post('/edit-product/:id', (req, res) => {
+  productHelper.updateProduct(req.params.id, req.body).then(() => {
     res.redirect('/admin/')
+    let image = req.files.image
+    image.mv('./public/product-images/' + req.params.id + '.jpg')
   })
 })
-
-
 module.exports = router;

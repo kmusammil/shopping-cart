@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var productHelper = require('../helpers/product-helpers')
-var userHelper = require('../helpers/user-helpers')
+var userHelper = require('../helpers/user-helpers');
+const { Db } = require('mongodb');
 const verifyLogin=(req, res, next)=>{
   if(req.session.userLoggedIn){
     next()
@@ -26,12 +27,14 @@ router.get('/login', (req, res)=>{
   }
 })
 router.get('/signup', (req, res)=>{
-  res.render('user/signup.hbs')
+  res.render('user/signup')
 })
 
 router.post('/signup', (req, res)=>{
   userHelper.doSignUp(req.body).then((response)=>{
-    console.log(response)
+    req.session.userLoggedIn=true;
+    req.session.user= response
+    res.redirect('/')
   })
 })
 router.post('/login', (req, res)=>{
@@ -52,8 +55,16 @@ router.get('/logout', (req,res)=>{
   res.redirect('/')
 })
 
-router.get('/cart', verifyLogin, (req, res)=>{
-  res.render('user/cart')
+router.get('/cart', verifyLogin, async(req, res)=>{
+  let products =await userHelper.getCartProducts(req.session._id)
+  console.log(products)
+  res.render('user/cart', {products})
+})
+
+router.get('/add-to-cart/:id', verifyLogin, (req, res)=>{
+  userHelper.addToCart(req.params.id, req.session.user._id).then((response)=>{
+    res.redirect('/')
+  })
 })
 
 
